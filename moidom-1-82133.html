@@ -1,0 +1,1389 @@
+﻿<!DOCTYPE html>
+
+<!-- Карина Георгиева Христова, група 1, ф.н. 82133 -->
+
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<script src="three.min.js"></script>
+		<script src="OrbitControls.js"></script>
+	</head>
+	
+	<body>
+		<script>
+			const FN = 82133; // факултетен номер 
+		</script>
+		
+		<script src="init.js"></script>
+		<script src="CSG.js"></script>
+			
+		<script>
+		
+			// 1. преименувайте файла на moidom-g-fn.html
+			//    g=номер на група, а fn=факултетен номер
+			//
+			// 2. сменете стойността на константата FN да
+			//    е факултетния номер, за да се генерират
+			//    сцената, земята и контурът на къщата ви
+			//
+			// 3. едва тогава почвайте да строите стените
+			//    и да добавяте исканите обекти по стаите
+			//
+			// 4. init.js се създава глобален обект scene
+			//    и в него трябва да сложите обектите си!
+			//
+			// 5. кубът по-долу е само за пример как може
+			//    да се слагат обекти в сцената
+			
+			var wallGeometry = new THREE.BoxGeometry( 1, 6, 0.1 ),
+				material = new THREE.MeshPhongMaterial( {color:'grey', shininess: 100} );
+			
+			//Walls
+			var walls = new THREE.Group();
+			var bedroomWalls = new THREE.Group();
+			var livingRoomWalls = new THREE.Group();
+			var bathroomWalls = new THREE.Group();
+			var kitchenWalls = new THREE.Group();
+		
+			var wall = new THREE.Mesh( wallGeometry, material ); //kitchen outer wall
+			wall.scale.set(4, 1, 1);
+			wall.position.set( -3, 3, 1.96 );
+			wall.receiveShadow = true;
+			wall.castShadow = true;
+			kitchenWalls.add(wall);
+
+			function createWall(scaleX, scaleY, scaleZ, posX, posY, posZ, yRotation = 0)
+			{
+				var currentWall = wall.clone();
+				currentWall.scale.set(scaleX, scaleY, scaleZ);
+				currentWall.position.set(posX, posY, posZ);
+				if (yRotation != 0) {
+					currentWall.rotateY(THREE.Math.degToRad(yRotation));
+				}
+				return currentWall;
+			}
+
+			//Bedroom walls
+			bedroomWalls.add(createWall(5, 1, 1, -4.96, 3, -3.5, 90)); //Bedroom outer wall
+			bedroomWalls.add(createWall(5, 1, 1, -2.5, 3, -2)); //Bedroom-kitchen inner wall
+			bedroomWalls.add(createWall(2, 1, 1, -4, 3, -6)); //Bedroom window outer wall
+			bedroomWalls.add(createWall(6, 1, 1, 3, 3, -6)); //Bedroom outer wall
+			bedroomWalls.add(createWall(4, 1, 1, 5.95, 3, -4, 90)); //Bedroom outer wall
+			bedroomWalls.add(createWall(2.28, 0.3, 1, 1, 5.1, -2)); //Bedroom inner wall over door
+			bedroomWalls.add(createWall(3, 0.2, 1, -1.5, 5.4, -6)); //Bedroom outer wall over window
+			bedroomWalls.add(createWall(3, 0.3, 1, -1.5, 0.9, -6)); //Bedroom outer wall under window
+
+			//Bathroom walls
+			bathroomWalls.add(createWall(3, 1, 1, 4.5, 3, 1.96)); //Bathroom room outer wall
+			bathroomWalls.add(createWall(4, 1, 1, 4, 3, -2)); //Bathroom-bedroom inner wall
+			bathroomWalls.add(createWall(2, 1, 1, 2, 3, -1, 90)); //Bathroom  inner wall
+			bathroomWalls.add(createWall(2.28, 0.3, 1, 2.5, 5.1, 1, -63)); //Bathroom over door wall
+			bathroomWalls.add(createWall(2, 0.1, 1, 5.95, 5.7, 0.2, 90)); //Bathroom outer wall over window
+			bathroomWalls.add(createWall(2, 0.8, 1, 5.95, 2, 0.2, 90)); //Bathroom outer wall under window
+			bathroomWalls.add(createWall(0.9, 1, 1, 5.95, 3, 1.5, 90)); //Bathroom outer wall next to window
+			bathroomWalls.add(createWall(1.2, 1, 1, 5.95, 3, -1.35, 90)); //Bathroom outer wall next to window
+
+			//Kitchen walls
+			kitchenWalls.add(createWall(2.28, 0.3, 1, -0.51, 5.1, 1, 63)); //Kitchen inner wall over door
+			kitchenWalls.add(createWall(2, 1, 1, 0, 3, -1, 90)); //Kitchen inner wall
+			kitchenWalls.add(createWall(2.28, 0.3, 1, 3.95, 5.1, 5, 90)); //Kitchen inner wall over door
+			kitchenWalls.add(createWall(2.5, 0.2, 1, -4.96, 5.4, 0.2, 90)); //Kitchen outer wall over window
+			kitchenWalls.add(createWall(2.5, 0.3, 1, -4.96, 0.9, 0.2, 90)); //Kitchen outer wall under window
+			kitchenWalls.add(createWall(0.5, 1, 1, -4.96, 3, 1.7, 90)); //Kitchen outer wall next to window
+
+			//Living room walls
+			livingRoomWalls.add(createWall(6, 1, 1, 1, 3, 9)); //Living room outer wall
+			livingRoomWalls.add(createWall(3, 1 ,1, 3.95, 3, 7.5, 90)); //Living room outer wall right
+			livingRoomWalls.add(createWall(2, 1 , 1, 3.95, 3, 3, 90)); //Living room outer wall right
+			livingRoomWalls.add(createWall(2, 1 , 1, -1.95, 3, 3, 90)); //Living room outer wall left
+			livingRoomWalls.add(createWall(2, 1 , 1, -1.95, 3, 8, 90)); //Living room outer wall left
+			livingRoomWalls.add(createWall(3, 0.2, 1, -1.95, 5.4, 5.5, 90)); //Living room outer wall over window
+			livingRoomWalls.add(createWall(3, 0.3, 1, -1.95, 0.9, 5.5, 90)); //Living room outer wall under window
+
+			//Frames
+			var doors = new THREE.Group();
+			var frameGeometry = new THREE.BoxGeometry( 1, 0.1, 0.1 ),
+				framematerial = new THREE.MeshPhongMaterial( {color:'white', shininess: 100} );
+
+			var frame = new THREE.Mesh(frameGeometry, framematerial);
+			frame.receiveShadow = true;
+			frame.castShadow = true;
+
+			function createFrame(scaleX, scaleY, scaleZ, posX, posY, posZ, yRotation = 0, zRotation = 0)
+			{
+				var currentFrame = frame.clone();
+				currentFrame.scale.set(scaleX, scaleY, scaleZ);
+				currentFrame.position.set(posX, posY, posZ);
+				if (yRotation != 0) {
+					currentFrame.rotateY(THREE.Math.degToRad(yRotation));
+				}
+				if (zRotation != 0) {
+					currentFrame.rotateZ(THREE.Math.degToRad(zRotation));
+				}
+				return currentFrame;
+			}
+
+			//Windows frames
+			var livingRoomWindowFrame = new THREE.Group();
+			var kitchenWindowFrame = new THREE.Group();
+			var bedroomWindowFrame = new THREE.Group();
+			var bathroomWindowFrame = new THREE.Group();
+		
+			//Living room window
+			livingRoomWindowFrame.add(createFrame(3, 1, 1, -1.95, 4.75, 5.5, 90)); //Living room window up
+			livingRoomWindowFrame.add(createFrame(3, 1, 1, -1.95, 1.85, 5.5, 90)); //Living room window down
+			livingRoomWindowFrame.add(createFrame(2.8, 1, 1, -1.95, 3.3, 6.95, 0, 90)); //Living room window side1
+			livingRoomWindowFrame.add(createFrame(2.8, 1, 1, -1.95, 3.3, 4.05, 0, 90)); //Living room window side2
+			livingRoomWindowFrame.add(createFrame(2.8, 1, 1, -1.95, 3.3, 5.5, 0, 90)); //Living room window middle
+
+			//Kitchen window 
+			kitchenWindowFrame.add(createFrame(2.45, 1, 1, -4.96, 4.75, 0.225, 90)); //Kitchen window up
+			kitchenWindowFrame.add(createFrame(2.45, 1, 1, -4.96, 1.85, 0.225, 90)); //Kitchen window down
+			kitchenWindowFrame.add(createFrame(2.8, 1, 1, -4.96, 3.3, 1.4, 0, 90)); //Kitchen window side1
+			kitchenWindowFrame.add(createFrame(2.8, 1, 1, -4.96, 3.3, -0.95, 0, 90)); //Kitchen window side2
+			kitchenWindowFrame.add(createFrame(2.8, 1, 1, -4.96, 3.3, 0.18, 0, 90)); //Kitchen window middle
+
+			//Bedroom window 
+			bedroomWindowFrame.add(createFrame(3, 1, 1, -1.5, 1.85, -6)); //Bedroom window down
+			bedroomWindowFrame.add(createFrame(3, 1, 1, -1.5, 4.75, -6)); //Bedroom window up
+			bedroomWindowFrame.add(createFrame(2.8, 1, 1, -1.5, 3.3, -6, 0, 90)); //Bedroom window middle
+			bedroomWindowFrame.add(createFrame(2.8, 1, 1, -2.95, 3.3, -6, 0, 90)); //Bedroom window side1
+			bedroomWindowFrame.add(createFrame(2.8, 1, 1, -0.05, 3.3, -6, 0, 90)); //Bedroom window side2
+
+			//Bathroom window 
+			bathroomWindowFrame.add(createFrame(1.8, 1, 1, 5.95, 4.45, 0.15, 90)); //Bathroom window down
+			bathroomWindowFrame.add(createFrame(1.8, 1, 1, 5.95, 5.35, 0.15, 90)); //Bathroom window up
+			bathroomWindowFrame.add(createFrame(0.85, 1, 1, 5.95, 4.9, 1, 0, 90)); //Bathroom window side1
+			bathroomWindowFrame.add(createFrame(0.85, 1, 1, 5.95, 4.9, -0.7, 0, 90)); //Bathroom window side2
+
+			//Doors frames
+			var livingRoomDoorFrame = new THREE.Group();
+			var kitchenDoorFrame = new THREE.Group();
+			var bedroomDoorFrame = new THREE.Group();
+			var bathroomDoorFrame = new THREE.Group();
+
+			//Doors
+			//Living room door
+			livingRoomDoorFrame.add(createFrame(4.2, 1, 1, 4, 2.1, 6, 0, 90)); //Living room door side1
+			livingRoomDoorFrame.add(createFrame(4.2, 1, 1, 4, 2.1, 4, 0, 90)); //Living room door side2
+			livingRoomDoorFrame.add(createFrame(2, 1, 1, 4, 4.15, 5, 90)); //Living room door up
+
+			//Bedroom door
+			bedroomDoorFrame.add(createFrame(4.2, 1, 1, 0.05, 2.1, -2, 0, 90)); //Bedroom door side1
+			bedroomDoorFrame.add(createFrame(4.2, 1, 1, 1.95, 2.1, -2, 0, 90)); //Bedroom door side2
+			bedroomDoorFrame.add(createFrame(2, 1, 1, 1, 4.15, -2)); //Bedroom door up
+
+			//Kitchen door
+			kitchenDoorFrame.add(createFrame(4.2, 1, 1, 0, 2.1, 0.05, 0, 90)); //Kitchen door side1
+			kitchenDoorFrame.add(createFrame(4.2, 1, 1, -0.95, 2.1, 1.95, 0, 90)); //Kitchen door side2
+			kitchenDoorFrame.add(createFrame(2.1, 1, 1, -0.5, 4.15, 0.95, 63)); //Kitchen door up
+
+			//Bathroom door
+			bathroomDoorFrame.add(createFrame(4.2, 1, 1, 2, 2.1, 0.05, 0, 90)); //Bathroom door side1
+			bathroomDoorFrame.add(createFrame(4.2, 1, 1, 3, 2.1, 1.95, 0, 90)); //Bathroom door side2
+			bathroomDoorFrame.add(createFrame(2.2, 1, 1, 2.45, 4.15, 1, -63)); //Bathroom door up
+
+			//Windows glass
+			var windows = new THREE.Group();
+			var livingRoomWindow = new THREE.Group();;
+			var kitchenWindow = new THREE.Group();
+			var bedroomWindow = new THREE.Group();;
+			var bathroomWindow = new THREE.Group();
+
+			var windowGeometry = new THREE.BoxGeometry( 1, 1, 0.1 ),
+				windowMaterial = new THREE.MeshPhysicalMaterial( {color:'blue', transparent: true, opacity: 0.4} );
+
+			function createWindowGlass(scaleX, scaleY, scaleZ, posX, posY, posZ, yRotation = 0)
+			{
+				var currentWindowGlass = new THREE.Mesh(windowGeometry, windowMaterial);
+				currentWindowGlass.scale.set(scaleX, scaleY, scaleZ);
+				currentWindowGlass.position.set(posX, posY, posZ);
+				if (yRotation != 0) {
+					currentWindowGlass.rotateY(THREE.Math.degToRad(yRotation));
+				}
+				return currentWindowGlass;
+			}
+
+			livingRoomWindow.add(createWindowGlass(1.35, 2.8, 1, -1.95, 3.3, 4.77, 90)); //Living room window1
+			livingRoomWindow.add(createWindowGlass(1.35, 2.8, 1, -1.95, 3.3, 6.225, 90)); //Living room window2
+			kitchenWindow.add(createWindowGlass(1.12, 2.8, 1, -4.96, 3.3, 0.79, 90));  //Kitchen window1
+			kitchenWindow.add(createWindowGlass(1.025, 2.8, 1, -4.96, 3.3, -0.38, 90)); //Kitchen window2
+			bedroomWindow.add(createWindowGlass(1.35, 2.8, 1, -2.225, 3.3, -6)); //Bedroom window1
+			bedroomWindow.add(createWindowGlass(1.35, 2.8, 1, -0.765, 3.3, -6)); //Bedroom window2
+			bathroomWindow.add(createWindowGlass(1.6, 0.8, 1, 5.95, 4.9, 0.15, 90)); //Bathroom window
+
+			//Object creation
+			//Start of guitar
+			function createGuitar(guitarColor){
+				var guitarObj = new THREE.Group();
+				guitarObj.receiveShadow = true;
+				guitarObj.castShadow = true;
+
+				var csgGuitarUpperPart = new CSG();
+				csgGuitarUpperPart.subtract( [new THREE.Mesh( new THREE.CylinderGeometry( 0.8, 0.8, 0.5, 80 )), 
+				new THREE.Mesh( new THREE.CylinderGeometry( 0.3, 0.3, 0.5, 80 ))] );
+
+				var guitarUpperPart = csgGuitarUpperPart.toMesh();
+				guitarUpperPart.material = new THREE.MeshPhongMaterial({color: guitarColor});
+				guitarUpperPart.rotateZ(THREE.Math.degToRad(90));
+				guitarUpperPart.position.set(0, 2.3, 0);
+				guitarObj.add(guitarUpperPart);
+
+				var guitarLowerPart = new THREE.Mesh(new THREE.CylinderGeometry( 1, 1, 0.5, 80 ),
+				new THREE.MeshPhongMaterial({color: guitarColor}))
+				guitarLowerPart.rotateZ(THREE.Math.degToRad(90));
+				guitarLowerPart.position.set(0, 1, 0);
+				guitarObj.add(guitarLowerPart);
+
+				var guitarNeck = new THREE.Mesh(new THREE.BoxGeometry(0.3, 2, 0.4),
+				new THREE.MeshPhongMaterial({color:'black'}));
+				guitarNeck.position.set(-0.2, 3.65, 0);
+				guitarObj.add(guitarNeck);
+
+				//Guitar strings
+				var zString = -0.18;
+				for (let index = 0; index < 6; index++) {
+					var currString = new THREE.Mesh(new THREE.BoxGeometry(0.01, 3.7, 0.01),
+					new THREE.MeshPhongMaterial({color:'silver'}));
+					currString.position.set(-0.35, 3.4, zString);
+					guitarObj.add(currString);
+					zString += 0.07;
+				}
+				
+				var stringHolder = guitarNeck.clone();
+				stringHolder.scale.set(1, 0.1, 1.5);
+				stringHolder.position.set(-0.2, 1.5, 0);
+				guitarObj.add(stringHolder);
+
+				var guitarHead =  new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.6, 0.6),
+				new THREE.MeshPhongMaterial({color: guitarColor}));
+				guitarHead.position.set(-0.2, 4.95, 0);
+				guitarObj.add(guitarHead);
+
+				//Guitar head tuning pegs
+				var yTunPeg = 4.75;
+				for (let index = 0; index < 3; index++) {
+					//Left side
+					var leftTuningPeg = new THREE.Mesh(new THREE.SphereGeometry(0.05, 32, 32),
+					new THREE.MeshPhongMaterial({color:'white'}));
+					leftTuningPeg.position.set(-0.2, yTunPeg, -0.35);
+					guitarObj.add(leftTuningPeg);
+
+					//Right side
+					var rightTuningPeg = new THREE.Mesh(new THREE.SphereGeometry(0.05, 32, 32),
+					new THREE.MeshPhongMaterial({color:'white'}));
+					rightTuningPeg.position.set(-0.2, yTunPeg, 0.35);
+					guitarObj.add(rightTuningPeg);
+					yTunPeg += 0.2;
+				}
+				
+				guitarObj.scale.set(0.4, 0.4, 0.4);
+				guitarObj.rotateY(THREE.Math.degToRad(90));
+				guitarObj.position.set(1, 0, -5.7);
+				return guitarObj;
+			}
+			//End of guitar
+
+			//Start piano
+			function createPiano(pianoColor, pedalColor) {
+				var pianoObj = new THREE.Group();
+				var pianoBack = new THREE.Mesh(new THREE.BoxGeometry(2, 1.3, 0.3),
+				new THREE.MeshPhongMaterial({color: pianoColor}));
+				pianoBack.position.set(0, 0.65, 0);
+				pianoObj.add(pianoBack);
+
+				var pianoKeysBase = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.05, 0.3),
+				new THREE.MeshPhongMaterial({color: pianoColor}));
+				pianoKeysBase.position.set(0, 1, 0.3);
+				pianoObj.add(pianoKeysBase);
+
+				var pianoKeysBaseSide = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.2, 0.3),
+				new THREE.MeshPhongMaterial({color: pianoColor}));
+				pianoKeysBaseSide.position.set(-0.95, 1.075, 0.3);
+				pianoObj.add(pianoKeysBaseSide);
+
+				var pianoKeysBaseSide2 = pianoKeysBaseSide.clone();
+				pianoKeysBaseSide2.position.set(0.95, 1.075, 0.3);
+				pianoObj.add(pianoKeysBaseSide2);
+
+				var xWhiteKey = -0.91;
+				for (let index = 0; index < 74; index++) { 
+					var currWhitePianoKey = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.02, 0.3),
+					new THREE.MeshPhongMaterial({color: 'white'}));
+					currWhitePianoKey.position.set(xWhiteKey, 1.035, 0.3);
+					pianoObj.add(currWhitePianoKey);	
+
+					xWhiteKey += 0.025;
+				}
+
+				var xBlackKey = -0.9;
+				for (let index = 0; index < 37; index++) { 
+					var currBlackPianoKey = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.02, 0.1),
+					new THREE.MeshPhongMaterial({color: 'black'}));
+					currBlackPianoKey.position.set(xBlackKey, 1.055, 0.2);
+					pianoObj.add(currBlackPianoKey);	
+
+					xBlackKey += 0.05;
+				}
+				
+				var pianoLeg = new THREE.Mesh(new THREE.CylinderGeometry( 0.03, 0.03, 1, 80 ),
+				new THREE.MeshPhongMaterial({color: pianoColor}));
+				pianoLeg.position.set(-0.94, 0.5, 0.4);
+				pianoObj.add(pianoLeg);
+
+				var pianoLeg2 = pianoLeg.clone();
+				pianoLeg2.position.set(0.94, 0.5, 0.4);
+				pianoObj.add(pianoLeg2);
+
+				var pianoPedalX = -0.2;
+				for (let index = 0; index < 3; index++) {
+					var pianoPedalCylinder = new THREE.Mesh(new THREE.CylinderGeometry( 0.01, 0.01, 0.08, 80 ),
+					new THREE.MeshPhongMaterial({color: pedalColor}));
+					pianoPedalCylinder.position.set(pianoPedalX, 0.1, 0.19);
+					pianoPedalCylinder.rotateZ(THREE.Math.degToRad(90));
+					pianoPedalCylinder.rotateX(THREE.Math.degToRad(90));
+					pianoObj.add(pianoPedalCylinder);
+
+					var pianoPedal = new THREE.Mesh(new THREE.CylinderGeometry( 0.03, 0.03, 0.05, 80 ),
+					new THREE.MeshPhongMaterial({color: pedalColor}));
+					pianoPedal.scale.set(1.5, 0.5, 2.5);
+					pianoPedal.position.set(pianoPedalX, 0.1, 0.3);
+					pianoObj.add(pianoPedal);
+					pianoPedalX += 0.2;
+				}
+				return pianoObj;
+			}
+			//End piano
+
+			//Beginning of radiator
+			function createRadiator(radiatorColor){
+				var radiatorObj = new THREE.Group();
+				radiatorObj.receiveShadow = true;
+				radiatorObj.castShadow = true;
+
+				var csgRadiatorBody = new CSG();
+				csgRadiatorBody.subtract( [new THREE.Mesh( new THREE.BoxGeometry( 2.5, 0.8, 0.2)), 
+				new THREE.Mesh( new THREE.BoxGeometry( 2.4, 0.8, 0.1))] );
+
+				var radiatorBody = csgRadiatorBody.toMesh();
+				radiatorBody.material = new THREE.MeshPhongMaterial({color: radiatorColor});
+				radiatorBody.position.set(-1.5, 1, -5.8);
+				radiatorObj.add(radiatorBody);
+				
+				var detailX = -2.7;
+				for (let index = 0; index < 25; index++) {
+					var radiatorDetail = new THREE.Mesh(new THREE.CylinderGeometry( 0.03, 0.03, 0.8, 32 ),
+					new THREE.MeshPhongMaterial({color: radiatorColor}));
+					radiatorDetail.position.set(detailX, 1, -5.7);
+					radiatorObj.add(radiatorDetail);
+					detailX += 0.1;
+				}
+
+				var topDetailX = -2.65;
+				for (let index = 0; index < 24; index++) {
+					var radiatorTopDetail = new THREE.Mesh(new THREE.CylinderGeometry( 0.01, 0.01, 0.1, 32 ),
+					new THREE.MeshPhongMaterial({color: radiatorColor}));
+					radiatorTopDetail.rotateY(THREE.Math.degToRad(90));
+					radiatorTopDetail.rotateZ(THREE.Math.degToRad(90));
+					radiatorTopDetail.position.set(topDetailX, 1.4, -5.8);
+					radiatorObj.add(radiatorTopDetail);
+					topDetailX += 0.1;
+				}
+				return radiatorObj
+			}
+			//Еnd of radiator
+
+			//Start of cylinder pillow
+			function createCylinderPillow(pillowColor){
+
+				var cylinderPillowObj = new THREE.Group();
+				
+				var pillowMiddle = new THREE.Mesh(new THREE.CylinderGeometry( 0.2, 0.2, 1.5, 32 ),
+				new THREE.MeshPhongMaterial({color: pillowColor}));
+				pillowMiddle.rotateZ(THREE.Math.degToRad(90));
+				pillowMiddle.rotateX(THREE.Math.degToRad(90));
+				pillowMiddle.position.set(-1.2, 0.8, 0);
+				cylinderPillowObj.add(pillowMiddle);
+
+				var pillowEnd = new THREE.Mesh(new THREE.SphereGeometry( 0.2, 32, 32, 0, Math.PI * 2, 5, 3 ),
+				new THREE.MeshPhongMaterial({color: pillowColor}));
+				pillowEnd.rotateX(THREE.Math.degToRad(90));
+				pillowEnd.position.set(-1.2, 0.8, 0.75);
+				cylinderPillowObj.add(pillowEnd);
+
+				var pillowEnd2 = pillowEnd.clone();
+				pillowEnd2.position.set(-1.2, 0.8, -0.75);
+				pillowEnd2.rotateZ(THREE.Math.degToRad(180));
+				cylinderPillowObj.add(pillowEnd2);
+
+				return cylinderPillowObj;
+			}
+			//End of cylinder pillow
+
+			//Start of torus pillow
+			function createTorusPillow(pillowColor) {
+				var torusPillow = new THREE.Mesh(new THREE.TorusGeometry( 1, 3, 30, 100 ),
+				new THREE.MeshPhongMaterial({color: pillowColor}));
+				torusPillow.scale.set(0.05, 0.05, 0.1);
+				torusPillow.position.set(-0.8, 0.8, 0.4);
+				return torusPillow;
+			}
+			//End of torus pillow
+
+			//Start of bed 
+			function createBed(bedColor, matressColor, blanketColor, cylinderPillowColor, pillowColor){
+				var bedObj = new THREE.Group();
+				bedObj.receiveShadow = true;
+				bedObj.castShadow = true;
+
+				var csgBedFrame = new CSG();
+				csgBedFrame.subtract( [new THREE.Mesh( new THREE.BoxGeometry( 3, 0.8, 2)), 
+				new THREE.Mesh( new THREE.BoxGeometry( 2.9, 0.8, 1.9))] );
+
+				var bedFrame = csgBedFrame.toMesh();
+				bedFrame.material = new THREE.MeshPhongMaterial({color: bedColor});
+				bedObj.add(bedFrame);
+
+				var bedBack = new THREE.Mesh( new THREE.BoxGeometry( 2, 2.5, 0.1), 
+				new THREE.MeshPhongMaterial({color: bedColor}));
+				bedBack.rotateY(THREE.Math.degToRad(90));
+				bedBack.position.set(-1.5, 0, 0)
+				bedObj.add(bedBack);
+
+				var bedMatress = new THREE.Mesh( new THREE.BoxGeometry( 2.9, 1.2, 1.9), 
+				new THREE.MeshPhongMaterial({color: matressColor}));
+				bedObj.add(bedMatress);
+
+				var blanketObj = new THREE.Group();
+				var zBlanketParticle = -0.79; //up to 1
+
+				for (let y = 0; y < 12 ; y++) {
+					var xBlanketParticle = -0.5;
+					for (let index = 0; index < 20; index++) {
+						var knittedBlanketParticle = new THREE.Mesh(new THREE.TorusKnotGeometry( 0.9, 0.9, 100, 16 ),
+						new THREE.MeshPhongMaterial({color: blanketColor, wireframe: true, roughness: 0.7 }));
+						knittedBlanketParticle.scale.set(0.05, 0.05, 0.05)
+						knittedBlanketParticle.position.set(xBlanketParticle, 0.65, zBlanketParticle);
+						knittedBlanketParticle.rotateZ(THREE.Math.degToRad(90));
+						knittedBlanketParticle.rotateY(THREE.Math.degToRad(90));
+						blanketObj.add(knittedBlanketParticle);
+						xBlanketParticle += 0.1;
+					}
+					zBlanketParticle += 0.15
+				}
+
+				var cylPillow = createCylinderPillow(cylinderPillowColor);
+				bedObj.add(cylPillow);
+
+
+				var torusPillow = createTorusPillow(pillowColor);
+				torusPillow.scale.set(0.05, 0.05, 0.1);
+				torusPillow.position.set(-0.8, 0.8, 0.4);
+				bedObj.add(torusPillow);
+
+				var secondTorusPillow = torusPillow.clone();
+				secondTorusPillow.position.set(-0.8, 0.8, -0.4);
+				bedObj.add(secondTorusPillow);
+				
+				bedObj.add(blanketObj)
+				return bedObj;
+			}
+			//End of bed
+
+			// //Start of nightstand
+			function createNightStand(nightstandColor) {
+				var nightStandObj = new THREE.Group();
+				nightStandObj.receiveShadow = true;
+				nightStandObj.castShadow = true;
+
+				var csgNightstand = new CSG();
+				csgNightstand.subtract( [new THREE.Mesh( new THREE.BoxGeometry( 0.5, 0.3, 0.4)), 
+				new THREE.Mesh( new THREE.BoxGeometry( 0.4, 0.3, 0.3))] );
+
+				var nightstand = csgNightstand.toMesh();
+				nightstand.material =  new THREE.MeshPhongMaterial({color: nightstandColor});
+				nightstand.rotateZ(THREE.Math.degToRad(90));
+				nightStandObj.add(nightstand);
+				return nightStandObj;
+			}
+			//End of nightstand 
+
+			function createWardrobePillow(pillowColor, xWardrobePillow, yWardrobePillow) {
+				var wardrobePillow = createCylinderPillow(pillowColor);
+					wardrobePillow.scale.set(1, 1, 0.5);
+					wardrobePillow.position.set(xWardrobePillow, yWardrobePillow, 0);
+					return wardrobePillow;
+			}
+
+			//Start wardrobe
+			function createWardrobe(wardrobeColor) {
+				var wardrobeObj = new THREE.Group();
+				wardrobeObj.receiveShadow = true;
+				wardrobeObj.castShadow = true;
+
+				var wardrobeBack = new THREE.Mesh( new THREE.BoxGeometry(3, 4, 0.05),
+				new THREE.MeshPhongMaterial({color: wardrobeColor}));
+				wardrobeBack.position.set(0, 2, -0.5);
+				wardrobeObj.add(wardrobeBack);
+
+				var wardrobeMiddle = wardrobeBack.clone();
+				wardrobeMiddle.scale.set(0.3, 1, 1);
+				wardrobeMiddle.rotateY(THREE.Math.degToRad(90));
+				wardrobeMiddle.position.set(0, 2, -0.05);
+				wardrobeObj.add(wardrobeMiddle);
+
+				var wardrobeSide1 = wardrobeMiddle.clone();
+				wardrobeSide1.position.set(-1.48, 2, -0.05);
+				wardrobeObj.add(wardrobeSide1);
+
+				var wardrobeSide2 = wardrobeMiddle.clone();
+				wardrobeSide2.position.set(1.48, 2, -0.05);
+				wardrobeObj.add(wardrobeSide2);
+
+				var yWardrobe = 0;
+				for (let index = 0; index < 5; index++) {
+					var wardrobeBottom = wardrobeMiddle.clone();
+					wardrobeBottom.scale.set(0.3, 0.75, 0.5);
+					wardrobeBottom.rotateX(THREE.Math.degToRad(90));
+					wardrobeBottom.position.set(0, yWardrobe, -0.05)
+					wardrobeObj.add(wardrobeBottom);
+					yWardrobe += 1;
+				}
+
+				var wardrobeDoor = wardrobeBack.clone();
+				wardrobeDoor.scale.set(0.5, 1, 1);
+				wardrobeDoor.position.set(0.7, 2, 0.4);
+				wardrobeObj.add(wardrobeDoor);
+
+				var wardrobeDoor2 = wardrobeBack.clone();
+				wardrobeDoor2.scale.set(0.5, 1, 1);
+				wardrobeDoor2.rotateY(THREE.Math.degToRad(135));
+				wardrobeDoor2.position.set(-1, 2, 0.9);
+				wardrobeObj.add(wardrobeDoor2);
+
+				var doorKnob = new THREE.Mesh(new THREE.SphereGeometry(0.08, 32, 32),
+					new THREE.MeshPhongMaterial({color: wardrobeColor}));
+				doorKnob.position.set(-0.8, 2, 1.2);
+				wardrobeObj.add(doorKnob);
+
+				var doorKnob2 = doorKnob.clone();
+				doorKnob2.position.set(0.4, 2, 0.5);
+				wardrobeObj.add(doorKnob2);
+	
+				var yWardrobePillow = -0.6;
+				var xWardrobePillow = 0;
+				for (let index = 0; index < 4; index++) {
+
+					var firstColor = index % 4 == 0 ? 0x011D6B: index % 3 == 0 ? 0x0138D0 : index % 2 == 0 ? 0x396EFE : 0x87A6FE;
+					var secondColor = index % 4 == 0 ? 0xFEF487 : index % 3 == 0 ? 0xFDF058 : index % 2 == 0 ? 0xF0DC02 : 0x887D01;
+					var thirdColor = index % 4 == 0 ? 0xF293A9 : index % 3 == 0 ? 0xE8456B : index % 2 == 0 ? 0xAF1639 : 0x560B1C;
+					var fourthColor = index % 4 == 0 ? 0xCA8DF8 : index % 3 == 0 ? 0x9319F0 : index % 2 == 0 ? 0x5B0A99 : 0x22043A;
+
+
+					wardrobeObj.add(createWardrobePillow(index % 2 == 0 ? firstColor : fourthColor, xWardrobePillow, yWardrobePillow));
+					wardrobeObj.add(createWardrobePillow(index % 2 == 0 ? secondColor : thirdColor, xWardrobePillow + 0.3, yWardrobePillow));
+					wardrobeObj.add(createWardrobePillow(index % 2 == 0 ? thirdColor : secondColor, xWardrobePillow + 0.6, yWardrobePillow));
+					wardrobeObj.add(createWardrobePillow(index % 2 == 0 ? fourthColor : firstColor, xWardrobePillow + 0.9, yWardrobePillow));
+					
+					yWardrobePillow += 1;
+				}
+				return wardrobeObj;
+			}
+			//End wardrobe
+
+			//Start toilet
+			function  createToilet(toiletColor) {
+				var toiletObj = new THREE.Group();
+				toiletObj.receiveShadow = true;
+				toiletObj.castShadow = true;
+
+				var toiletBowl = new THREE.Mesh( new THREE.SphereGeometry(0.4, 32, 16, 0, 2 * Math.PI, 1.4, Math.PI),
+				new THREE.MeshPhongMaterial({color: toiletColor}));
+				toiletBowl.scale.set(1, 1, 1.4);
+				toiletBowl.position.set(0, 0.55, 1);
+				toiletObj.add(toiletBowl);
+
+				var toiletSeat = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.1, 16, 100),
+				new THREE.MeshPhongMaterial({color: toiletColor}));
+				toiletSeat.rotateX(THREE.Math.degToRad(90));
+				toiletSeat.scale.set(1, 1.4, 1);
+				toiletSeat.position.set(0, 0.56, 1);
+				toiletObj.add(toiletSeat);
+
+				var toiletStand = new THREE.Mesh( new THREE.CylinderGeometry( 0.2, 0.3, 0.5, 64 ),
+				new THREE.MeshPhongMaterial({color: toiletColor}));
+				toiletStand.position.set(0, 0, 1);
+				toiletObj.add(toiletStand);
+
+				var toiletLid = new THREE.Mesh(new THREE.SphereGeometry(0.3, 32, 16),
+				new THREE.MeshPhongMaterial({color: toiletColor}));
+				toiletLid.scale.set(1, 1.7, 0.4);
+				toiletLid.position.set(0, 1.1, 0.5);
+				toiletObj.add(toiletLid);
+
+				var toiletTank = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 0.8, 32),
+				new THREE.MeshPhongMaterial({color: toiletColor}));
+				toiletTank.position.set(0, 1.1, 0.3);
+				toiletTank.scale.set(1, 1, 0.3);
+				toiletObj.add(toiletTank);
+
+				var toiletButton = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.08, 32),
+				new THREE.MeshPhongMaterial({color:'silver'}));
+				toiletButton.position.set(0, 1.5, 0.3);
+				toiletObj.add(toiletButton);
+				return toiletObj;
+			}
+			 //End toilet
+
+			 //Start battery sink
+			 function createBatterySink() {
+				 var batteryObj = new THREE.Group();
+				 var bathroomSinkBatteryBody = new THREE.Mesh( new THREE.CylinderGeometry(0.04, 0.04, 0.2, 32),
+				 new THREE.MeshPhongMaterial({color: 'silver'}));
+				 bathroomSinkBatteryBody.position.set(0, 1.4, -0.3);
+				 batteryObj.add(bathroomSinkBatteryBody);
+
+				 var bathroomSinkBattery = new THREE.Mesh( new THREE.TorusGeometry(5, 2, 30, 9, 2.9),
+				 new THREE.MeshPhongMaterial({color: 'silver'}));
+				 bathroomSinkBattery.scale.set(0.02, 0.02, 0.02);
+				 bathroomSinkBattery.rotateY(THREE.Math.degToRad(90));
+				 bathroomSinkBattery.position.set(0, 1.5, -0.2);
+				 batteryObj.add(bathroomSinkBattery);
+				 return batteryObj;
+			 }
+			 //End battery sink
+
+			 //Start bathroom sink
+			 function createBathroomSink(bathroomSinkColor) {
+				 var bathroomSinkObj = new THREE.Group();
+
+				 var bathroomSinkBox = new THREE.Mesh(new THREE.BoxGeometry(1, 0.5, 0.8), 
+				 new THREE.MeshPhongMaterial({color: bathroomSinkColor}));
+				 bathroomSinkBox.position.set(0, 1, 0);
+
+				 var bathroomSinkHole = new THREE.Mesh(new THREE.SphereGeometry(0.35, 32, 16), 
+				 new THREE.MeshPhongMaterial({color: bathroomSinkColor}));
+				 bathroomSinkHole.position.set(0, 1.4, 0);
+
+				 var csgBathroomSink = new CSG();
+				 csgBathroomSink.subtract([bathroomSinkBox, bathroomSinkHole]);
+
+				 var bathroomSinkBody = csgBathroomSink.toMesh();
+				 bathroomSinkBody.material = new THREE.MeshPhongMaterial({color: bathroomSinkColor});
+				 bathroomSinkObj.add(bathroomSinkBody);
+
+				 var batteryBathroom = createBatterySink();
+				 batteryBathroom.position.set(0, -0.1, -0.06);
+				 bathroomSinkObj.add(batteryBathroom);
+
+				 var batteryControl = new THREE.Mesh(new THREE.SphereGeometry(0.05, 32, 16), 
+				 new THREE.MeshPhongMaterial({color: 'silver'}));
+				 batteryControl.position.set(0.1, 1.3, -0.35);
+				 bathroomSinkObj.add(batteryControl);
+
+				 var batteryControl2 = batteryControl.clone();
+				 batteryControl2.position.set(-0.1, 1.3, -0.35);
+				 bathroomSinkObj.add(batteryControl2);
+
+				 return bathroomSinkObj;
+			 }
+			 //End bathroom sink
+
+			 //Start curved doorknob
+			 function createCurvedHandle(doorKnobColor) {
+				var curvedDoorKnob = new THREE.Mesh(new THREE.TorusGeometry( 0.1, 0.05, 30, 100, 3.3 ),
+				new THREE.MeshPhongMaterial({color: doorKnobColor}));
+				return curvedDoorKnob;
+			 }
+			 //End curved doorKNob
+
+			//Start shower cabin
+			function createShowerCabin(showerCabinColor, showerCabinBottomColor, showerColor) {
+				var showerCabinObj = new THREE.Group();
+				showerCabinObj.receiveShadow = true;
+				showerCabinObj.castShadow = true;
+				
+				var showerCabinBottom = new THREE.Mesh(new THREE.BoxGeometry(2, 1.5, 0.2),
+				new THREE.MeshPhongMaterial({color: showerCabinBottomColor}));
+				showerCabinBottom.rotateX(THREE.Math.degToRad(90));
+				showerCabinObj.add(showerCabinBottom);
+
+				var showerCabinSide = new THREE.Mesh(new THREE.BoxGeometry(1.5, 4, 0.05),
+				new THREE.MeshPhysicalMaterial({color: showerCabinColor, transparent: true, opacity: 0.5}));
+				showerCabinSide.rotateY(THREE.Math.degToRad(90));
+				showerCabinSide.position.set(0.98, 2.1, 0);
+				showerCabinObj.add(showerCabinSide);
+
+				var showerCabinSide2 = showerCabinSide.clone();
+				showerCabinSide2.position.set(-0.98, 2.1, 0);
+				showerCabinObj.add(showerCabinSide2);
+
+				var showerCabinDoor = showerCabinSide.clone();
+				showerCabinDoor.scale.set(1.3, 1, 1);
+				showerCabinDoor.rotateY(THREE.Math.degToRad(74));
+				showerCabinDoor.position.set(0.05, 2.1, -1)
+				showerCabinObj.add(showerCabinDoor);
+
+				var showerCabinDoorKnob = createCurvedHandle(showerColor);
+				showerCabinDoorKnob.position.set(-0.5, 2.5, -1.2);
+				showerCabinDoorKnob.scale.set(2.5, 1, 1);
+				showerCabinDoorKnob.rotateY(THREE.Math.degToRad(90));
+				showerCabinDoorKnob.rotateZ(THREE.Math.degToRad(90));
+				showerCabinDoorKnob.rotateX(THREE.Math.degToRad(180));
+				showerCabinObj.add(showerCabinDoorKnob);
+				
+				var showerCabinDrain = new THREE.Mesh(new THREE.CylinderGeometry( 0.1, 0.1, 0.05, 32),
+				new THREE.MeshPhongMaterial({color:'silver'}));
+				showerCabinDrain.position.set(0.5, 0.1, 0.2);
+				showerCabinObj.add(showerCabinDrain);
+
+				var showerObj = new THREE.Group();
+				showerObj.receiveShadow = true;
+				showerObj.castShadow = true;
+
+				var showerBody = new THREE.Mesh(new THREE.CylinderGeometry( 0.05, 0.05, 2, 32),
+				new THREE.MeshPhongMaterial({color: showerColor}));
+				showerBody.position.set(0, 2.8, 0.7);
+				showerObj.add(showerBody);
+
+				var showerBodyUpperPart = showerBody.clone();
+				showerBodyUpperPart.scale.set(1, 0.1, 1);
+				showerBodyUpperPart.rotateZ(THREE.Math.degToRad(90));
+				showerBodyUpperPart.rotateX(THREE.Math.degToRad(90));
+				showerBodyUpperPart.position.set(0, 3.6, 0.6)
+				showerObj.add(showerBodyUpperPart);
+
+				var showerBodyLowerPart = showerBody.clone();
+				showerBodyLowerPart.scale.set(1.5, 0.2, 1.5);
+				showerBodyLowerPart.rotateX(THREE.Math.degToRad(90));
+				showerBodyLowerPart.rotateZ(THREE.Math.degToRad(90));
+				showerBodyLowerPart.position.set(0, 2, 0.6);
+				showerObj.add(showerBodyLowerPart);
+
+				var showerControl = new THREE.Mesh(new THREE.SphereGeometry( 0.1, 32, 16),
+				new THREE.MeshPhongMaterial({color: showerColor}));
+				showerControl.position.set(0.25, 2, 0.6);
+				showerObj.add(showerControl);
+
+				var showerControl2 = showerControl.clone();
+				showerControl2.position.set(-0.25, 2, 0.6);
+				showerObj.add(showerControl2);
+
+				var showerHeadSphere = new THREE.Mesh(new THREE.SphereGeometry( 0.3, 32, 16),
+				new THREE.MeshPhongMaterial({color: showerColor}));
+				showerHeadSphere.scale.set(1, 0.4, 1);
+				showerHeadSphere.position.set(0, 3.6, 0.3);
+				showerObj.add(showerHeadSphere);
+				
+				showerCabinObj.add(showerObj);
+				return showerCabinObj;
+			}
+			//End shower cabin
+
+			// //Start sofa
+			function createSofa(sofaColor, firstPillowColor, secondPillowColor) {
+				var sofaObj = new THREE.Group();
+				sofaObj.receiveShadow = true;
+				sofaObj.castShadow = true;
+
+				var sofaLowerPart = new THREE.Mesh(new THREE.CylinderGeometry( 0.5, 0.5, 3, 32),
+				new THREE.MeshPhongMaterial({color: sofaColor}));
+				sofaLowerPart.rotateZ(THREE.Math.degToRad(90));
+				sofaLowerPart.scale.set(0.4, 1.1, 1.5);
+				sofaLowerPart.position.set(0, 0.5, 0);
+				sofaObj.add(sofaLowerPart);
+
+				var sofaBack = sofaLowerPart.clone();
+				sofaBack.scale.set(0.4, 1.1, 1.8);
+				sofaBack.rotateY(THREE.Math.degToRad(90));
+				sofaBack.position.set(0, 0.7, 0.55);
+				sofaObj.add(sofaBack);
+
+				var sofaSide = sofaLowerPart.clone();
+				sofaSide.scale.set(0.2, 0.5, 1);
+				sofaSide.rotateZ(THREE.Math.degToRad(90));
+				sofaSide.rotateX(THREE.Math.degToRad(90));
+				sofaSide.position.set(1.7, 0.5, 0);
+				sofaObj.add(sofaSide);
+
+				var sofaSide2 = sofaSide.clone();
+				sofaSide2.position.set(-1.7, 0.5, 0);
+				sofaObj.add(sofaSide2);
+
+				var firstPillowHeight = 0.05;
+				var secondPillowHeight = 0.07;
+				var xPillow = -1.4;
+				for (let index = 0; index < 9; index++) {
+					var color = index % 2 == 0 ? secondPillowColor : firstPillowColor;
+					var pillowHeight = index % 2 == 0 ? firstPillowHeight : secondPillowHeight;
+					var sofaPillow = createTorusPillow(color);
+					sofaPillow.scale.set(0.05, pillowHeight, 0.05);
+					sofaPillow.position.set(xPillow, 0.9, 0.2);
+					sofaObj.add(sofaPillow);
+					xPillow += 0.35;
+				}
+				return sofaObj;
+			}
+			//End sofa
+
+			//Start dining table
+			function createDiningTable(diningTableColor) {
+				var diningTableObj = new THREE.Group();
+				diningTableObj.receiveShadow = true;
+				diningTableObj.castShadow = true;
+
+				var diningTableTop = new THREE.Mesh(new THREE.BoxGeometry( 2, 0.2, 1),
+				new THREE.MeshPhongMaterial({color: diningTableColor}));
+				diningTableTop.position.set(0, 1.2, 0);
+				diningTableTop.rotateY(THREE.Math.degToRad(90));
+				diningTableObj.add(diningTableTop);
+
+				var diningTableLeg = new THREE.Mesh(new THREE.BoxGeometry( 0.1, 1.3, 0.1),
+				new THREE.MeshPhongMaterial({color: diningTableColor}));
+				diningTableLeg.position.set(-0.45, 0.5, 0.9);
+				diningTableObj.add(diningTableLeg);
+
+				var diningTableLeg = diningTableLeg.clone()
+				diningTableLeg.position.set(0.45, 0.5, 0.9);
+				diningTableObj.add(diningTableLeg);
+
+				var diningTableLeg2 = diningTableLeg.clone();
+				diningTableLeg2.position.set(-0.45, 0.5, 0.9);
+				diningTableObj.add(diningTableLeg2);
+			
+				var diningTableLeg3 = diningTableLeg.clone();
+				diningTableLeg3.position.set(0.45, 0.5, -0.9);
+				diningTableObj.add(diningTableLeg3);
+
+				var diningTableLeg4 = diningTableLeg.clone();
+				diningTableLeg4.position.set(-0.45, 0.5, -0.9);
+				diningTableObj.add(diningTableLeg4);
+				return diningTableObj
+			}
+			//End dining table;
+
+			//Start chair
+			function createChair(chairColor, chairLegColor) {
+				var chairObj = new THREE.Group();
+				chairObj.receiveShadow = true;
+				chairObj.castShadow = true;
+
+				var csgChairSeat = new CSG();
+				var sphere1 = new THREE.Mesh(new THREE.SphereGeometry(0.4, 32, 16));
+				sphere1.position.set(0, 1, 0);
+				var sphere2 = new THREE.Mesh(new THREE.SphereGeometry(0.4, 32, 16));
+				sphere2.position.set(0.1, 1.2, 0.2);
+				csgChairSeat.subtract([sphere1, sphere2]);
+				
+				var chairSeat = csgChairSeat.toMesh();
+				chairSeat.material = new THREE.MeshPhongMaterial({color: chairColor});
+
+				chairSeat.rotateZ(THREE.Math.degToRad(110));
+				chairSeat.rotateX(THREE.Math.degToRad(130));
+				chairSeat.position.set(-0.8, 0.6, -0.8);
+				chairSeat.scale.set(1.3, 1, 1);
+				chairObj.add(chairSeat);
+
+				var chairLeg = new THREE.Mesh(new THREE.CylinderGeometry( 0.02, 0.02, 0.6, 32),
+				new THREE.MeshPhongMaterial({color: chairLegColor}));
+				chairLeg.position.set(0, 0.2, -0.3);
+				chairLeg.rotateX(THREE.Math.degToRad(20));
+				chairObj.add(chairLeg);
+
+				var chairLeg2 = chairLeg.clone();
+				chairLeg2.position.set(0, 0.2, 0.3);
+				chairLeg2.rotateX(THREE.Math.degToRad(140));
+				chairObj.add(chairLeg2);
+
+				var chairLeg3 = new THREE.Mesh(new THREE.CylinderGeometry( 0.02, 0.02, 0.6, 32),
+				new THREE.MeshPhongMaterial({color:0xefba99}));
+				chairLeg3.position.set(-0.4, 0.2, 0);
+				chairLeg3.rotateZ(THREE.Math.degToRad(150));
+				chairObj.add(chairLeg3);
+				return chairObj;
+			}
+			//End chair
+
+			//Start carpet
+			function createCarpet(carpetColor) {
+				var carpetObj = new THREE.Mesh(new THREE.CylinderGeometry( 2, 2, 0.05, 32),
+				new THREE.MeshPhongMaterial({color: carpetColor}));
+				carpetObj.scale.set(1.2, 1, 1);
+				carpetObj.rotateY(THREE.Math.degToRad(90));
+				carpetObj.position.set(1, 0, 4);
+				return carpetObj
+			}
+			//End carpet
+
+			//Start mug
+			function createMug(mugColor) {
+				var mugObj = new THREE.Group();
+
+				var csgMug = new CSG();
+				csgMug.subtract( [new THREE.Mesh( new THREE.CylinderGeometry( 0.1, 0.1, 0.2, 80 )), 
+				new THREE.Mesh( new THREE.CylinderGeometry( 0.09, 0.09, 0.2, 80 ))] );
+				
+				var mugBody = csgMug.toMesh();
+				mugBody.material = new THREE.MeshPhongMaterial({color: mugColor});
+				mugBody.position.set(1, 1.4, 4);
+				mugObj.add(mugBody);
+
+				var mugHandle = new THREE.Mesh( new THREE.TorusGeometry( 0.06, 0.01, 16, 100, 3.2 ), 
+				new THREE.MeshPhongMaterial({color: mugColor}));
+				mugHandle.position.set(1.1, 1.4, 4);
+				mugHandle.rotateZ(THREE.Math.degToRad(90));
+				mugHandle.rotateX(THREE.Math.degToRad(180));
+				mugObj.add( mugHandle );
+
+				var mugBottom = new THREE.Mesh( new THREE.CylinderGeometry( 0.09, 0.09, 0.01, 80 ),
+				new THREE.MeshPhongMaterial({color: mugColor}));
+				mugBottom.position.set(1, 1.3, 4);
+				mugObj.add(mugBottom);
+				return mugObj;
+			}
+			//End mug
+			
+			//Start bowl
+			function createBowl(bowlColor) {
+				var bowlObj = new THREE.Group();
+				var b1 = new THREE.Mesh(new THREE.SphereGeometry(0.5, 32, 16));
+				var b2 = new THREE.Mesh(new THREE.SphereGeometry(0.48, 32, 16));
+				b2.position.set(0, 0.1, 0);
+
+				var csgBowl = new CSG();
+				csgBowl.subtract([b1, b2]);
+				var bowlFromCSG = csgBowl.toMesh();
+				bowlFromCSG.material = new THREE.MeshPhongMaterial({color: bowlColor});
+				bowlObj.add(bowlFromCSG);
+
+				return bowlObj;
+			}
+			//End bowl
+
+			//Start fridge
+			function createFridge(fridgeColor) {
+				var fridgeObj = new THREE.Group();
+
+				var fridgeBody1 = new THREE.Mesh(new THREE.BoxGeometry( 1.5, 4, 1));
+				var fridgeBody2 = new THREE.Mesh(new THREE.BoxGeometry( 1.4, 3.8, 0.8));
+				fridgeBody2.position.set(0, 0, 0.1)
+
+				var csgFridge = new CSG();
+				csgFridge.subtract([fridgeBody1, fridgeBody2]);
+
+				var fridgeBody = csgFridge.toMesh();
+				fridgeBody.material = new THREE.MeshPhongMaterial({color: fridgeColor});
+				fridgeObj.add(fridgeBody);
+
+				var yfridgeShelf = 0.6;
+				for (let index = 0; index < 3; index++) {
+					var fridgeShelf = new THREE.Mesh(new THREE.BoxGeometry( 1.4, 1, 0.05),
+					new THREE.MeshPhongMaterial({color: 0x6d66e8, transparent: true, opacity: 0.4}));
+					fridgeShelf.position.set(0, yfridgeShelf, 0);
+					fridgeShelf.rotateX(THREE.Math.degToRad(90));
+					fridgeObj.add(fridgeShelf);
+
+					yfridgeShelf += 0.5;
+				}
+
+				var yrefridgeratorShelf = 0.05;
+				for (let index = 0; index < 4; index++) {
+					var refridgeratorShelf = new THREE.Mesh(new THREE.BoxGeometry( 1.4, 1, 0.05),
+					new THREE.MeshPhongMaterial({color: fridgeColor}));
+					refridgeratorShelf.position.set(0, yrefridgeratorShelf, 0);
+					refridgeratorShelf.rotateX(THREE.Math.degToRad(90));
+					fridgeObj.add(refridgeratorShelf);
+
+					yrefridgeratorShelf -= 0.5;
+				}
+				
+				var fridgeDoor =  new THREE.Mesh(new THREE.BoxGeometry( 1.4, 2, 0.05),
+				new THREE.MeshPhongMaterial({color: fridgeColor}));
+				fridgeDoor.position.set(0.1, 1, 0.7);
+				fridgeDoor.rotateY(THREE.Math.degToRad(20));
+				fridgeObj.add(fridgeDoor);
+
+				var fridgeDoorHandle = new THREE.Mesh(new THREE.CylinderGeometry( 0.03, 0.03, 2, 32),
+				new THREE.MeshPhongMaterial({color: 'silver'}));
+				fridgeDoorHandle.position.set(-0.5, 1, 0.95);
+				fridgeObj.add(fridgeDoorHandle);
+
+				var refridgeratorDoor = fridgeDoor.clone();
+				refridgeratorDoor.position.set(0.05, -1, 0.6);
+				refridgeratorDoor.rotateY(THREE.Math.degToRad(-10));
+				fridgeObj.add(refridgeratorDoor);
+
+				var refridgeratorDoorHandle = fridgeDoorHandle.clone();
+				refridgeratorDoorHandle.position.set(-0.6, -1, 0.75);
+				fridgeObj.add(refridgeratorDoorHandle);
+
+				return fridgeObj;
+			}
+			//End fridge
+
+			//Start oven rack
+			function createOvenRack(ovenRackColor) {
+				var ovenRackObj = new THREE.Group();
+
+				var ovenRackBody1 = new THREE.Mesh(new THREE.BoxGeometry( 1.3, 0.7, 0.05));
+				var ovenRackBody2 = new THREE.Mesh(new THREE.BoxGeometry( 1.2, 0.6, 0.05));
+
+				var csgOvenRack = new CSG();
+				csgOvenRack.subtract([ovenRackBody1, ovenRackBody2]);
+
+				var ovenRackBody = csgOvenRack.toMesh();
+				ovenRackBody.material = new THREE.MeshPhongMaterial({color: ovenRackColor});
+				ovenRackObj.add(ovenRackBody);
+
+				var xOvenElement = -0.55;
+				for (let index = 0; index < 23; index++) {
+					var currOvenElement = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.7, 0.01),
+					new THREE.MeshPhongMaterial({color:ovenRackColor}));
+					currOvenElement.position.set(xOvenElement, 0, 0);
+					ovenRackBody.add(currOvenElement);
+					xOvenElement += 0.05;
+				}
+
+				return ovenRackObj;
+			}
+			//End oven rack
+
+			//Start oven 
+			function createOven(ovenColor, secondOvenColor) {
+				var ovenObj = new THREE.Group();
+
+				var ovenBody1 = new THREE.Mesh(new THREE.BoxGeometry( 1.5, 2, 1));
+				var ovenBody2 = new THREE.Mesh(new THREE.BoxGeometry( 1.3, 1.2, 0.8));
+				ovenBody2.position.set(0, -0.2, 0.1);
+
+				var csgOven = new CSG();
+				csgOven.subtract([ovenBody1, ovenBody2]);
+
+				var ovenBody = csgOven.toMesh();
+				ovenBody.material = new THREE.MeshPhongMaterial({color: ovenColor});
+				ovenObj.add(ovenBody);
+
+				var ovenRack1 = createOvenRack('silver');
+				ovenRack1.rotateX(THREE.Math.degToRad(90));
+				ovenRack1.position.set(0, 0, 0.1); 
+				ovenObj.add(ovenRack1);
+
+				var ovenRack2 = ovenRack1.clone();
+				ovenRack2.position.set(0, -0.4, 0.1);
+				ovenObj.add(ovenRack2);
+
+				var ovenButton = new THREE.Mesh(new THREE.SphereGeometry(0.05, 32, 16), 
+				new THREE.MeshPhongMaterial({color: 'silver'}));
+				ovenButton.position.set(0.3, 0.7, 0.5);
+				ovenObj.add(ovenButton);
+
+				var ovenButton2 = ovenButton.clone();
+				ovenButton2.position.set(-0.3, 0.7, 0.5);
+				ovenObj.add(ovenButton2);
+
+				var ovenDisplay = new THREE.Mesh(new THREE.BoxGeometry( 0.4, 0.2, 0.01),
+				new THREE.MeshPhongMaterial({color: 'silver'}));
+				ovenDisplay.position.set(0, 0.7, 0.5);
+				ovenObj.add(ovenDisplay);
+
+				var ovenDoor = new THREE.Mesh(new THREE.BoxGeometry( 1.3, 1.2, 0.05),
+				new THREE.MeshPhongMaterial({color: secondOvenColor}));
+				ovenDoor.position.set(0, -0.2, 0.6);
+				ovenDoor.rotateX(THREE.Math.degToRad(10));
+				ovenObj.add(ovenDoor);
+
+				var ovenHotPlate = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.01, 32),
+				new THREE.MeshPhongMaterial({color: 0xcf4e4e}));
+				ovenHotPlate.position.set(-0.4, 1, 0);
+				ovenObj.add(ovenHotPlate);
+
+				var ovenHotPlate2 = ovenHotPlate.clone();
+				ovenHotPlate2.position.set(0.4, 1, 0);
+				ovenObj.add(ovenHotPlate2);
+
+				return ovenObj;
+			}
+			//End oven
+
+			//Start kitchen counter
+			function createKitchenCounter(counterColor) {
+				var counterObj = new THREE.Group();
+
+				var counterBody = new THREE.Mesh(new THREE.BoxGeometry( 1.5, 2, 1),
+				new THREE.MeshPhongMaterial({color: counterColor}));
+				counterObj.add(counterBody);
+
+				var counterHandle = createCurvedHandle('silver');
+				counterHandle.position.set(0, 0.7, 0.5);
+				counterHandle.rotateX(THREE.Math.degToRad(90));
+				counterHandle.scale.set(2, 0.5, 0.5);
+				counterObj.add(counterHandle);
+
+				return counterObj;
+			}
+			//End kitchen counter
+
+			//Start kitchen counter sink
+			function createKitchenSink(counterColor) {
+				var kitchenSinkObj = new THREE.Group();
+				var sinkHole = new THREE.Mesh(new THREE.SphereGeometry(0.4, 32, 16));
+				sinkHole.position.set(0, 1, 0);
+
+				var csgKitchenSink = new CSG();
+				csgKitchenSink.subtract([new THREE.Mesh(new THREE.BoxGeometry( 1.5, 2, 1)), 
+				sinkHole]);
+
+				var kitchenCounterSink = csgKitchenSink.toMesh();
+				kitchenCounterSink.material = new THREE.MeshPhongMaterial({color: counterColor})
+				kitchenSinkObj.add(kitchenCounterSink);
+
+				var kitchenSinkBattery = createBatterySink();
+				kitchenSinkBattery.position.set(0, -0.35, -0.15);
+				kitchenSinkObj.add(kitchenSinkBattery);
+
+				return kitchenSinkObj;
+			}
+			//End kitchen counter sink
+
+			//Start extractor fan
+			function createExtractorFan(extractorFanColor) {
+				var extractorFanObj = new THREE.Group();
+
+				var extractorFanUpperPart = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.6, 0.4),
+				new THREE.MeshPhongMaterial({color: extractorFanColor}));
+				extractorFanUpperPart.position.set(0, 1.7, 0);
+				extractorFanObj.add(extractorFanUpperPart);
+
+				var extractorFanLowerPart = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.2, 1),
+				new THREE.MeshPhongMaterial({color: extractorFanColor}));
+				extractorFanLowerPart.position.set(0, 1.3, 0);
+				extractorFanObj.add(extractorFanLowerPart);
+
+				return extractorFanObj;
+			}
+			//End extractor fan
+
+			//Adding furniture start
+			var bedroomFurniture = new THREE.Group();
+			var kitchenFurniture = new THREE.Group();
+			var livingRoomFurniture = new THREE.Group();
+			var bathroomFurniture = new THREE.Group();
+
+			//Bedroom
+			var piano = createPiano('black', 0xFFFF00);
+			piano.scale.set(1.5, 1.5, 1.5)
+			piano.position.set(2, 0, -5.5);
+			bedroomFurniture.add(piano);
+
+			var guitar = createGuitar('blue');
+			guitar.rotateY(THREE.Math.degToRad(180));
+			guitar.position.set(-1, 0, -2.25);
+			bedroomFurniture.add(guitar);
+
+			var bedroomRadiator = createRadiator('white');
+			bedroomFurniture.add(bedroomRadiator);
+
+			var bed = createBed(0xefba99, 0xbbfd04, 0x4bbfd1, 0x4bbfd1, 0xFD04BB);
+			bed.position.set(-3.35, 0, -4)
+			bedroomFurniture.add(bed);
+
+			var nightstand1 = createNightStand(0xefba99);
+			nightstand1.position.set(-4.8, 0.25, -2.7);
+			bedroomFurniture.add(nightstand1);
+			var nightstand2 = nightstand1.clone();
+			nightstand2.position.set(-4.8, 0.25, -5.3);
+			bedroomFurniture.add(nightstand2);
+
+			var wardrobe = createWardrobe(0xefba99);
+			wardrobe.position.set(5.35, 0, -4);
+			wardrobe.rotateY(THREE.Math.degToRad(270));
+			bedroomFurniture.add(wardrobe);
+
+			//Kitchen
+			var kitchenRadiator = createRadiator('white');
+			kitchenRadiator.scale.set(0.5, 1, 1);
+			kitchenRadiator.rotateY(THREE.Math.degToRad(90));
+			kitchenRadiator.position.set(1, 0.1, -0.7);
+			kitchenFurniture.add(kitchenRadiator);
+
+			var fridge = createFridge(0x0f0f0f);
+			fridge.position.set(-1, 2, -1.4);
+			kitchenFurniture.add(fridge);
+
+			var oven = createOven(0x2e2a2a, 0x0f0f0f );
+			oven.position.set(-2.5, 1, -1.4);
+			kitchenFurniture.add(oven);
+
+			var kitchenCounter = createKitchenCounter(0x0f0f0f);
+			kitchenCounter.position.set(-4, 1, -1.4);
+			kitchenFurniture.add(kitchenCounter);
+
+			var kitchenCounter2 = createKitchenCounter(0x0f0f0f);
+			kitchenCounter2.rotateY(THREE.Math.degToRad(180));
+			kitchenCounter2.scale.set(0.85, 1, 1);
+			kitchenCounter2.position.set(-2.75, 1, 1.4)
+			kitchenFurniture.add(kitchenCounter2);
+
+			var kitchenSinkCounter = createKitchenSink(0x0f0f0f);
+			kitchenSinkCounter.position.set(-4, 1, 1.4);
+			kitchenSinkCounter.scale.set(0.85, 1, 1);
+			kitchenSinkCounter.rotateY(THREE.Math.degToRad(180));
+			kitchenFurniture.add(kitchenSinkCounter);
+
+			var kitchenCounterTop = kitchenCounter.clone();
+			kitchenCounterTop.scale.set(1, 0.5, 1);
+			kitchenCounterTop.position.set(-4, 3.5, -1.4);
+			kitchenCounterTop.rotateZ(THREE.Math.degToRad(180));
+			kitchenFurniture.add(kitchenCounterTop);
+
+			var kitchenCounterTop2 = kitchenCounterTop.clone();
+			kitchenCounterTop2.scale.set(0.85, 0.5, 1);
+			kitchenCounterTop2.position.set(-4, 3.5, 1.4);
+			kitchenCounterTop2.rotateY(THREE.Math.degToRad(180));
+			kitchenFurniture.add(kitchenCounterTop2);
+
+			var kitchenCounterTop3 = kitchenCounterTop2.clone();
+			kitchenCounterTop3.position.set(-2.75, 3.5, 1.4);
+			kitchenFurniture.add(kitchenCounterTop3);
+
+			var extractorFan = createExtractorFan('silver');
+			extractorFan.position.set(-2.5, 2, -1.4);
+			kitchenFurniture.add(extractorFan);
+
+			//Bathroom
+			var toilet = createToilet('white');
+			toilet.position.set(2.5, 0.2, -2);
+			bathroomFurniture.add(toilet);
+
+			var bathroomSink = createBathroomSink('white');
+			bathroomSink.position.set(4, 0, -1.3);
+			bathroomFurniture.add(bathroomSink);
+
+			var showerCabin = createShowerCabin(0x7ea4e0, 'white', 'silver');
+			showerCabin.position.set(4.85, 0, 1.15);
+			bathroomFurniture.add(showerCabin);
+
+			//Living room
+			var livingRoomRadiator = createRadiator('white');
+			livingRoomRadiator.rotateY(THREE.Math.degToRad(90));
+			livingRoomRadiator.scale.set(1.3, 1 ,1);
+			livingRoomRadiator.position.set(4, 0.1, 3.5);
+			livingRoomFurniture.add(livingRoomRadiator);
+
+			var sofa = createSofa(0x2bbcd4, 0xfafa0a, 0xFD04BB);
+			sofa.position.set(1.1, 0, 8.2);
+			livingRoomFurniture.add(sofa);
+
+			var diningTableSet = new THREE.Group();
+
+			var diningTable = createDiningTable(0xefba99);
+			diningTable.position.set(1, 0, 4);
+			diningTableSet.add(diningTable);
+
+			var chair = createChair(0xFD04BB, 0xefba99);
+			chair.position.set(0.2, 0, 3.3);
+			diningTableSet.add(chair);
+
+			var chair2 = createChair(0xFD04BB, 0xefba99);
+			chair2.position.set(0.2, 0, 4.5);
+			diningTableSet.add(chair2);
+
+			var chair3 = createChair(0xFD04BB, 0xefba99);
+			chair3.position.set(1.8, 0, 3.3);
+			chair3.rotateY(THREE.Math.degToRad(180));
+			diningTableSet.add(chair3);
+
+			var chair4 = createChair(0xFD04BB, 0xefba99);
+			chair4.position.set(1.8, 0, 4.5);
+			chair4.rotateY(THREE.Math.degToRad(180));
+			diningTableSet.add(chair4);
+
+			var chair5 = createChair(0xFD04BB, 0xefba99);
+			chair5.position.set(1, 0, 5.2);
+			chair5.rotateY(THREE.Math.degToRad(90));
+			diningTableSet.add(chair5);
+			
+			var chair6 = createChair(0xFD04BB, 0xefba99);
+			chair6.position.set(1, 0, 2.7);
+			chair6.rotateY(THREE.Math.degToRad(270));
+			diningTableSet.add(chair6);
+			livingRoomFurniture.add(diningTableSet);
+
+			livingRoomFurniture.add(createCarpet(0xbbfd04));
+
+			var mug = createMug('blue');
+			mug.scale.set(0.7, 0.7, 0.7);
+			mug.position.set(0.6, 0.4, 1.4);
+			livingRoomFurniture.add(mug);
+
+			var mug2 = createMug(0x2bbcd4);
+			mug2.scale.set(0.7, 0.7, 0.7);
+			mug2.position.set(0.6, 0.4, 0.5);
+			livingRoomFurniture.add(mug2);
+
+			var mug3 = createMug(0x2bbcd4);
+			mug3.scale.set(0.7, 0.7, 0.7);
+			mug3.position.set(-0.1, 0.4, 1.9);
+			livingRoomFurniture.add(mug3);
+
+			var mug4 = createMug('blue');
+			mug4.scale.set(0.7, 0.7, 0.7);
+			mug4.position.set(-0.1, 0.4, 1);
+			livingRoomFurniture.add(mug4);
+
+			var bowl = createBowl(0x864e9a);
+			bowl.scale.set(0.3, 0.3, 0.3);
+			bowl.position.set(0.7, 1.45, 4.4);
+			livingRoomFurniture.add(bowl);
+
+			var bowl2 = createBowl(0x629A4E);
+			bowl2.scale.set(0.3, 0.3, 0.3);
+			bowl2.position.set(0.7, 1.45, 3.5);
+			livingRoomFurniture.add(bowl2);
+
+			var bowl3 = createBowl(0x864e9a);
+			bowl3.scale.set(0.3, 0.3, 0.3);
+			bowl3.position.set(1.3, 1.45, 3.6);
+			livingRoomFurniture.add(bowl3);
+
+			var bowl4 = createBowl(0x629A4E);
+			bowl4.scale.set(0.3, 0.3, 0.3);
+			bowl4.position.set(1.3, 1.45, 4.5);
+			livingRoomFurniture.add(bowl4);
+			//Adding furniture end
+
+			//Rendering
+			walls.add(bedroomWalls);
+			walls.add(livingRoomWalls);
+			walls.add(bathroomWalls);
+			walls.add(kitchenWalls);
+
+			livingRoomWindow.add(livingRoomWindowFrame);
+			kitchenWindow.add(kitchenWindowFrame);
+			bedroomWindow.add(bedroomWindowFrame);
+			bathroomWindow.add(bathroomWindowFrame);
+			
+			doors.add(livingRoomDoorFrame);
+			doors.add(kitchenDoorFrame);
+			doors.add(bedroomDoorFrame);
+			doors.add(bathroomDoorFrame);
+
+			windows.add(livingRoomWindow);
+			windows.add(kitchenWindow);
+			windows.add(bedroomWindow);
+			windows.add(bathroomWindow);
+
+			scene.add(walls);
+			scene.add(doors);
+			scene.add(windows);
+
+			scene.add(bedroomFurniture);
+			scene.add(kitchenFurniture);
+			scene.add(livingRoomFurniture);
+			scene.add(bathroomFurniture);
+		</script>
+		
+	</body>
+</html>
+
+
